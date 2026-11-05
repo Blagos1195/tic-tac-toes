@@ -78,13 +78,14 @@ function updateModeLabels() {
   scoreXName.textContent = aiMode ? aiPlayer === "X" ? "AI" : "YOU" : "PLAYER 1";
   scoreOName.textContent = aiMode ? aiPlayer === "O" ? "AI" : "YOU" : "PLAYER 2";
   opponentName.textContent = aiMode ? "Trained AI" : "Player 2";
-  const humanPlayer = aiPlayer === "X" ? "O" : "X";
+  const humanPlayer = aiMode ? aiPlayer === "X" ? "O" : "X" : "X";
+  const opponentPlayer = aiMode ? aiPlayer : "O";
   const humanSymbol = document.querySelector("#score-you-symbol");
   const aiSymbol = document.querySelector("#score-opponent-symbol");
   humanSymbol.textContent = humanPlayer;
   humanSymbol.className = `score-symbol ${humanPlayer === "O" ? "o-text" : "x-text"}`;
-  aiSymbol.textContent = aiPlayer;
-  aiSymbol.className = `score-symbol ${aiPlayer === "O" ? "o-text" : "x-text"}`;
+  aiSymbol.textContent = opponentPlayer;
+  aiSymbol.className = `score-symbol ${opponentPlayer === "O" ? "o-text" : "x-text"}`;
   if (aiMode) {
     roundLabel.textContent = currentPlayer === aiPlayer ? "THE AI IS THINKING" : "YOUR TURN";
     nextTitle.textContent = currentPlayer === aiPlayer ? "AI turn" : "Your move";
