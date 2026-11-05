@@ -23,6 +23,7 @@ const wins = [
 
 let board = Array(9).fill("");
 let currentPlayer = "X";
+let aiPlayer = "O";
 let mode = "ai";
 let gameOver = false;
 let aiBusy = false;
@@ -53,7 +54,7 @@ function render() {
     cell.textContent = value;
     cell.classList.toggle("o", value === "O");
     cell.classList.toggle("winning", false);
-    cell.disabled = Boolean(value) || gameOver || aiBusy || (mode === "ai" && currentPlayer === "O");
+    cell.disabled = Boolean(value) || gameOver || aiBusy || (mode === "ai" && currentPlayer === aiPlayer);
     cell.setAttribute("aria-label", `${["Top left", "Top middle", "Top right", "Middle left", "Centre", "Middle right", "Bottom left", "Bottom middle", "Bottom right"][index]}, ${value || "empty"}`);
   });
 
@@ -74,16 +75,20 @@ function render() {
 
 function updateModeLabels() {
   const aiMode = mode === "ai";
-  scoreXName.textContent = aiMode ? "YOU" : "PLAYER 1";
-  scoreOName.textContent = aiMode ? "AI" : "PLAYER 2";
+  scoreXName.textContent = aiMode ? aiPlayer === "X" ? "AI" : "YOU" : "PLAYER 1";
+  scoreOName.textContent = aiMode ? aiPlayer === "O" ? "AI" : "YOU" : "PLAYER 2";
   opponentName.textContent = aiMode ? "Trained AI" : "Player 2";
-  document.querySelector("#score-you-symbol").textContent = "X";
-  document.querySelector("#score-opponent-symbol").textContent = "O";
-  document.querySelector("#score-opponent-symbol").className = "score-symbol o-text";
+  const humanPlayer = aiPlayer === "X" ? "O" : "X";
+  const humanSymbol = document.querySelector("#score-you-symbol");
+  const aiSymbol = document.querySelector("#score-opponent-symbol");
+  humanSymbol.textContent = humanPlayer;
+  humanSymbol.className = `score-symbol ${humanPlayer === "O" ? "o-text" : "x-text"}`;
+  aiSymbol.textContent = aiPlayer;
+  aiSymbol.className = `score-symbol ${aiPlayer === "O" ? "o-text" : "x-text"}`;
   if (aiMode) {
-    roundLabel.textContent = "YOUR TURN";
-    nextTitle.textContent = "Your move";
-    nextCopy.textContent = "You play as X. The trained AI plays as O.";
+    roundLabel.textContent = currentPlayer === aiPlayer ? "THE AI IS THINKING" : "YOUR TURN";
+    nextTitle.textContent = currentPlayer === aiPlayer ? "AI turn" : "Your move";
+    nextCopy.textContent = `You play as ${aiPlayer === "X" ? "O" : "X"}. The trained AI plays as ${aiPlayer}.`;
   } else {
     roundLabel.textContent = "PLAYER 1'S TURN";
     nextTitle.textContent = "Player 1 starts";
@@ -94,11 +99,11 @@ function updateModeLabels() {
 function updateTurnText() {
   if (gameOver) return;
   if (mode === "ai") {
-    if (currentPlayer === "X") {
+    if (currentPlayer !== aiPlayer) {
       roundLabel.textContent = "YOUR TURN";
       statusHeading.textContent = "Choose your next move.";
       nextTitle.textContent = "Your move";
-      nextCopy.textContent = "You're X. The AI will respond as O.";
+      nextCopy.textContent = `You're ${currentPlayer}. The AI will play as ${aiPlayer}.`;
     } else {
       roundLabel.textContent = "THE AI IS THINKING";
       statusHeading.textContent = "The model is choosing.";
@@ -201,10 +206,10 @@ async function makeAIMove() {
     await loadAI();
     const pythonBoard = board.map((value, index) => value || String(index + 1));
     pyodide.globals.set("browser_board", pyodide.toPy(pythonBoard));
-    const move = pyodide.runPython("ai.get_ai_moveO(browser_board, 0.01)");
+    const move = pyodide.runPython(`ai.get_ai_move${aiPlayer}(browser_board, 0.01)`);
     if (Number.isInteger(move) && move >= 0 && move < 9 && !board[move]) {
       aiBusy = false;
-      placeMove(move, "O");
+      placeMove(move, aiPlayer);
     } else {
       throw new Error("The trained model returned an invalid move.");
     }
@@ -220,7 +225,8 @@ async function makeAIMove() {
 
 function startGame(resetScores = false) {
   board = Array(9).fill("");
-  currentPlayer = "X";
+  currentPlayer = Math.random() < 0.5 ? "X" : "O";
+  aiPlayer = currentPlayer === "X" ? "O" : "X";
   gameOver = false;
   aiBusy = false;
   if (resetScores) {
@@ -231,8 +237,13 @@ function startGame(resetScores = false) {
   updateModeLabels();
   updateTurnText();
   render();
-  if (mode === "ai") loadAI().catch(() => {});
-  else setModelStatus("Python AI not needed in Player vs Player mode");
+  if (mode === "ai") {
+    loadAI().then(() => {
+      if (currentPlayer === aiPlayer && !gameOver) makeAIMove();
+    }).catch(() => {});
+  } else {
+    setModelStatus("Python AI not needed in Player vs Player mode");
+  }
 }
 
 modeButtons.forEach(button => {
@@ -252,7 +263,7 @@ modeButtons.forEach(button => {
 cells.forEach((cell, index) => {
   cell.addEventListener("click", async () => {
     if (mode === "ai") {
-      if (currentPlayer !== "X" || aiBusy || gameOver) return;
+      if (currentPlayer === aiPlayer || aiBusy || gameOver) return;
       if (placeMove(index, "X") && !gameOver) await makeAIMove();
     } else {
       if (gameOver || aiBusy || board[index]) return;
