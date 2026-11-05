@@ -124,12 +124,12 @@ function finishGame(result) {
   if (result) {
     scores[result.player] += 1;
     statusHeading.textContent = mode === "ai"
-      ? result.player === "X" ? "You beat the AI." : "The AI takes this one."
+      ? result.player === aiPlayer ? "The AI takes this one." : "You beat the AI."
       : `Player ${result.player === "X" ? "1" : "2"} wins.`;
     roundLabel.textContent = "GAME OVER";
-    nextTitle.textContent = result.player === "X"
-      ? mode === "ai" ? "A win for you" : "Player 1 wins"
-      : mode === "ai" ? "AI wins" : "Player 2 wins";
+    nextTitle.textContent = mode === "ai"
+      ? result.player === aiPlayer ? "AI wins" : "A win for you"
+      : result.player === "X" ? "Player 1 wins" : "Player 2 wins";
     nextCopy.textContent = "Three in a row. Start another round when you're ready.";
   } else {
     scores.draw += 1;
