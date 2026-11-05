@@ -162,6 +162,7 @@ function finishGame(result) {
     nextTitle.textContent = "No winner this time";
     nextCopy.textContent = "A full board and perfectly matched moves.";
   }
+  saveScores();
   render();
 }
 
@@ -253,10 +254,12 @@ function startGame(resetScores = false) {
   aiPlayer = currentPlayer === "X" ? "O" : "X";
   gameOver = false;
   aiBusy = false;
+  scores = scoresByMode[mode];
   if (resetScores) {
     scores.X = 0;
     scores.O = 0;
     scores.draw = 0;
+    saveScores();
   }
   updateModeLabels();
   updateTurnText();
@@ -275,12 +278,13 @@ modeButtons.forEach(button => {
     const nextMode = button.dataset.mode;
     if (mode === nextMode) return;
     mode = nextMode;
+    scores = scoresByMode[mode];
     modeButtons.forEach(item => {
       const active = item === button;
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
     });
-    startGame(true);
+    startGame();
   });
 });
 
