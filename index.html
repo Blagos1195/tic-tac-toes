@@ -3,19 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f5f5">
-  <title>Tic Tac Toes</title>
+  <meta name="theme-color" content="#ffffff">
+  <title>Tic Tac Toe</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <main class="shell">
-    <header class="topbar">
-      <a class="brand" href="./">Tic Tac Toes</a>
-      <span class="top-note"><span class="status-dot"></span> <span id="model-status">AI loads when you start a game</span></span>
-    </header>
-    <h1>Tic Tac Toe</h1>
+    <div class="page-heading">
+      <h1>Tic Tac Toe</h1>
+      <span class="top-note"><span class="status-dot"></span><span id="model-status">Loading AI...</span></span>
+    </div>
     <section class="game-card" aria-label="Tic Tac Toe game">
       <div class="mode-picker" role="group" aria-label="Game mode">
         <button class="mode-button active" data-mode="ai" aria-pressed="true">Player vs AI</button>
@@ -68,7 +67,6 @@
         </aside>
       </div>
     </section>
-    <footer><span>No account or server required.</span></footer>
   </main>
 </body>
 </html>
