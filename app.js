@@ -30,7 +30,30 @@ let aiBusy = false;
 let pyodide = null;
 let aiReady = false;
 let aiLoading = null;
-const scores = { X: 0, O: 0, draw: 0 };
+const scoreStorageKey = "tic-tac-toe-scores-v1";
+const scoresByMode = loadScores();
+let scores = scoresByMode[mode];
+
+function loadScores() {
+  const empty = () => ({ X: 0, O: 0, draw: 0 });
+  try {
+    const saved = JSON.parse(localStorage.getItem(scoreStorageKey));
+    return {
+      ai: { ...empty(), ...(saved?.ai || {}) },
+      pvp: { ...empty(), ...(saved?.pvp || {}) }
+    };
+  } catch {
+    return { ai: empty(), pvp: empty() };
+  }
+}
+
+function saveScores() {
+  try {
+    localStorage.setItem(scoreStorageKey, JSON.stringify(scoresByMode));
+  } catch (error) {
+    console.warn("Could not save scores in this browser.", error);
+  }
+}
 
 function winnerFor(position) {
   for (const line of wins) {
@@ -66,7 +89,7 @@ function render() {
   } else {
     turnPill.style.visibility = "visible";
     turnSymbol.textContent = currentPlayer;
-    turnLabel.textContent = mode === "ai" && currentPlayer === "O" ? "AI THINKING" : mode === "ai" ? "YOUR MOVE" : `PLAYER ${currentPlayer === "X" ? "1" : "2"}`;
+    turnLabel.textContent = mode === "ai" && currentPlayer === aiPlayer ? "AI THINKING" : mode === "ai" ? "YOUR MOVE" : `PLAYER ${currentPlayer === "X" ? "1" : "2"}`;
   }
   scoreX.textContent = scores.X;
   scoreO.textContent = scores.O;
@@ -265,7 +288,7 @@ cells.forEach((cell, index) => {
   cell.addEventListener("click", async () => {
     if (mode === "ai") {
       if (currentPlayer === aiPlayer || aiBusy || gameOver) return;
-      if (placeMove(index, "X") && !gameOver) await makeAIMove();
+      if (placeMove(index, currentPlayer) && !gameOver) await makeAIMove();
     } else {
       if (gameOver || aiBusy || board[index]) return;
       placeMove(index, currentPlayer);
