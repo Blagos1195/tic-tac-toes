@@ -250,8 +250,8 @@ async function makeAIMove() {
 
 function startGame(resetScores = false) {
   board = Array(9).fill("");
-  currentPlayer = Math.random() < 0.5 ? "X" : "O";
-  aiPlayer = currentPlayer === "X" ? "O" : "X";
+  currentPlayer = "X";
+  aiPlayer = mode === "ai" && Math.random() < 0.5 ? "X" : "O";
   gameOver = false;
   aiBusy = false;
   scores = scoresByMode[mode];
