@@ -30,6 +30,7 @@ let aiBusy = false;
 let pyodide = null;
 let aiReady = false;
 let aiLoading = null;
+let gameId = 0;
 const scoreStorageKey = "tic-tac-toe-scores-v1";
 const scoresByMode = loadScores();
 let scores = scoresByMode[mode];
@@ -98,6 +99,9 @@ function render() {
 
 function updateModeLabels() {
   const aiMode = mode === "ai";
+  const footerLabels = document.querySelectorAll(".board-footer span");
+  footerLabels[0].lastChild.textContent = aiMode ? (aiPlayer === "X" ? " Trained AI" : " You") : " Player 1";
+  footerLabels[1].lastChild.textContent = aiMode ? (aiPlayer === "O" ? " Trained AI" : " You") : " Player 2";
   scoreXName.textContent = aiMode ? aiPlayer === "X" ? "AI" : "YOU" : "PLAYER 1";
   scoreOName.textContent = aiMode ? aiPlayer === "O" ? "AI" : "YOU" : "PLAYER 2";
   opponentName.textContent = aiMode ? "Trained AI" : "Player 2";
@@ -224,21 +228,27 @@ async function loadAI() {
 }
 
 async function makeAIMove() {
+  const activeGame = gameId;
+  const player = aiPlayer;
+  if (gameOver || currentPlayer !== player || aiBusy) return;
   aiBusy = true;
   updateTurnText();
   render();
   try {
     await loadAI();
+    if (activeGame !== gameId || gameOver || currentPlayer !== player) return;
     const pythonBoard = board.map((value, index) => value || String(index + 1));
     pyodide.globals.set("browser_board", pyodide.toPy(pythonBoard));
-    const move = pyodide.runPython(`ai.get_ai_move${aiPlayer}(browser_board, 0.01)`);
+    const move = pyodide.runPython("ai.get_ai_move" + player + "(browser_board, 0.01)");
+    if (activeGame !== gameId) return;
     if (Number.isInteger(move) && move >= 0 && move < 9 && !board[move]) {
       aiBusy = false;
-      placeMove(move, aiPlayer);
+      placeMove(move, player);
     } else {
       throw new Error("The trained model returned an invalid move.");
     }
   } catch (error) {
+    if (activeGame !== gameId) return;
     console.error(error);
     aiBusy = false;
     statusHeading.textContent = "The AI couldn't make a move.";
@@ -247,8 +257,8 @@ async function makeAIMove() {
     render();
   }
 }
-
 function startGame(resetScores = false) {
+  const activeGame = ++gameId;
   board = Array(9).fill("");
   currentPlayer = "X";
   aiPlayer = mode === "ai" && Math.random() < 0.5 ? "X" : "O";
@@ -266,7 +276,7 @@ function startGame(resetScores = false) {
   render();
   if (mode === "ai") {
     loadAI().then(() => {
-      if (currentPlayer === aiPlayer && !gameOver) makeAIMove();
+      if (activeGame === gameId && currentPlayer === aiPlayer && !gameOver) makeAIMove();
     }).catch(() => {});
   } else {
     setModelStatus("Python AI not needed in Player vs Player mode");
