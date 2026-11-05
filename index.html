@@ -42,8 +42,8 @@
             <button class="cell" data-cell="8" aria-label="Bottom right, empty"></button>
           </div>
           <div class="board-footer">
-            <span><i class="legend-x">X</i> <span id="score-x-name">YOU</span></span>
-            <span><i class="legend-o">O</i> <span id="score-o-name">AI</span></span>
+            <span><i class="legend-x">X</i> Player 1</span>
+            <span><i class="legend-o">O</i> <span id="opponent-name">Trained AI</span></span>
           </div>
         </section>
         <aside class="side-panel">
@@ -52,17 +52,17 @@
             <div class="score-box">
               <span class="score-symbol x-text" id="score-you-symbol">X</span>
               <span class="score-number" id="score-x">0</span>
-              <span class="score-name" id="score-x-name-label">YOU</span>
+              <span class="score-name" id="score-x-name">YOU</span>
             </div>
             <div class="score-divider"></div>
             <div class="score-box">
               <span class="score-symbol o-text" id="score-opponent-symbol">O</span>
               <span class="score-number" id="score-o">0</span>
-              <span class="score-name" id="score-o-name-label">AI</span>
+              <span class="score-name" id="score-o-name">AI</span>
             </div>
           </div>
           <div class="draw-count"><span>Draws</span><b id="score-draw">0</b></div>
-          <p class="next-copy" id="next-copy">You play as X. The trained AI plays as O.</p>
+          <p class="next-copy"><b id="next-title">Your move</b><br><span id="next-copy">You play as X. The trained AI plays as O.</span></p>
           <button class="primary-button" id="new-game">New game</button>
           <button class="text-button" id="reset-scores">Reset scores</button>
         </aside>
